@@ -82,3 +82,19 @@ let evolve state command =
     let newState = List.fold apply state events
     (newState, events) |> ok
   | Bad err -> Bad err
+
+let (|ServeDrinkCompletesIPOrder|_|) ipo drink =
+  match isServingDrinkCompletesIPOrder ipo drink with
+  | true -> Some drink
+  | false -> None
+
+let (|ServeFoodCompletesIPOrder|_|) ipo food =
+  match isServingFoodCompletesIPOrder ipo food with
+  | true -> Some food
+  | false -> None
+
+let (|ServeDrinkCompletesOrder|_|) order drink =
+  match isServingDrinkCompletesOrder order drink with
+  | true -> Some drink
+  | false -> None
+
