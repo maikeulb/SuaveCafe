@@ -14,3 +14,5 @@ type Error =
   | CanNotPrepareNonOrderedFood of Food
   | CanNotPrepareAlreadyPreparedFood of Food
   | CanNotServeNonPreparedFood of Food
+  | InvalidPayment of decimal * decimal
+  | CanNotPayForNonServedOrder
