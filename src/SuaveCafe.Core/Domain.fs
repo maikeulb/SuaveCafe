@@ -42,5 +42,12 @@ let orderAmount order =
     |> List.map (fun (Drink d) -> d.Price) |> List.sum
   foodAmount + drinksAmount
 
+let nonServedFoods ipo =
+  List.except ipo.ServedFoods ipo.PlacedOrder.Foods
+
+let nonServedDrinks ipo =
+  List.except ipo.ServedDrinks ipo.PlacedOrder.Drinks
+
+
 let payment order =
   {Tab = order.Tab; Amount = orderAmount order}
