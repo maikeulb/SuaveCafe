@@ -8,3 +8,9 @@ type Error =
   | OrderAlreadyPlaced
   | CanNotServeNonOrderedDrink of Drink
   | CanNotServeAlreadyServedDrink of Drink
+  | CanNotPrepareNonOrderedFood of Food
+  | CanNotPrepareAlreadyPreparedFood of Food
+  | CanNotServeNonPreparedFood of Food
+  | CanNotPrepareNonOrderedFood of Food
+  | CanNotPrepareAlreadyPreparedFood of Food
+  | CanNotServeNonPreparedFood of Food
