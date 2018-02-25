@@ -27,6 +27,31 @@ let (|AlreadyServedDrink|_|) ipo drink =
   | true -> Some drink
   | false -> None
 
+let (|AlreadyServedFood|_|) ipo food =
+  match List.contains food ipo.ServedFoods with
+  | true -> Some food
+  | false -> None
+
+let (|AlreadyPreparedFood|_|) ipo food =
+  match List.contains food ipo.PreparedFoods with
+  | true -> Some food
+  | false -> None
+
+let (|ServeDrinkCompletesIPOrder|_|) ipo drink =
+  match isServingDrinkCompletesIPOrder ipo drink with
+  | true -> Some drink
+  | false -> None
+
+let (|ServeFoodCompletesIPOrder|_|) ipo food =
+  match isServingFoodCompletesIPOrder ipo food with
+  | true -> Some food
+  | false -> None
+
+let (|ServeDrinkCompletesOrder|_|) order drink =
+  match isServingDrinkCompletesOrder order drink with
+  | true -> Some drink
+  | false -> None
+
 let handleOpenTab tab = function
 | ClosedTab _ -> [TabOpened tab] |> ok
 | _ -> TabAlreadyOpened |> fail
@@ -67,6 +92,54 @@ let handleServeDrink drink tabId = function
     |> ok
   | _ -> [drinkServed] |> ok
 
+let handlePrepareFood food tabId = function
+| PlacedOrder order ->
+  match food with
+  | NonOrderedFood order _ ->
+    CanNotPrepareNonOrderedFood food |> fail
+  | _ -> [FoodPrepared (food, tabId)] |> ok
+| ServedOrder _ -> OrderAlreadyServed |> fail
+| OpenedTab _ ->  CanNotPrepareForNonPlacedOrder |> fail
+| ClosedTab _ -> CanNotPrepareWithClosedTab |> fail
+| OrderInProgress ipo ->
+  let order = ipo.PlacedOrder
+  match food with
+  | NonOrderedFood order _ ->
+    CanNotPrepareNonOrderedFood food |> fail
+  | AlreadyPreparedFood ipo _ ->
+      CanNotPrepareAlreadyPreparedFood food |> fail
+  | _ -> [FoodPrepared (food, tabId)] |> ok
+
+let handleServeFood food tabId = function
+| OrderInProgress ipo ->
+  let order = ipo.PlacedOrder
+  let foodServed = FoodServed (food, tabId)
+  match food with
+  | NonOrderedFood order _ ->
+    CanNotServeNonOrderedFood food |> fail
+  | AlreadyServedFood ipo _ ->
+    CanNotServeAlreadyServedFood food |> fail
+  | UnPreparedFood ipo _ ->
+    CanNotServeNonPreparedFood food |> fail
+  | ServeFoodCompletesIPOrder ipo _ ->
+    foodServed ::
+      [OrderServed (ipo.PlacedOrder, payment order)]
+    |> ok
+  | _ -> [foodServed] |> ok
+| PlacedOrder _ -> CanNotServeNonPreparedFood food |> fail
+| ServedOrder _ -> OrderAlreadyServed |> fail
+| OpenedTab _ -> CanNotServeForNonPlacedOrder |> fail
+| ClosedTab _ -> CanNotServeWithClosedTab |> fail
+
+let handleCloseTab payment = function
+| ServedOrder order ->
+  let orderAmount = orderAmount order
+  if payment.Amount = orderAmount then
+    [TabClosed payment] |> ok
+  else
+    InvalidPayment (orderAmount, payment.Amount) |> fail
+| _ -> CanNotPayForNonServedOrder |> fail
+
 let execute state command =
     match command with
     | OpenTab tab -> handleOpenTab tab state
@@ -82,19 +155,3 @@ let evolve state command =
     let newState = List.fold apply state events
     (newState, events) |> ok
   | Bad err -> Bad err
-
-let (|ServeDrinkCompletesIPOrder|_|) ipo drink =
-  match isServingDrinkCompletesIPOrder ipo drink with
-  | true -> Some drink
-  | false -> None
-
-let (|ServeFoodCompletesIPOrder|_|) ipo food =
-  match isServingFoodCompletesIPOrder ipo food with
-  | true -> Some food
-  | false -> None
-
-let (|ServeDrinkCompletesOrder|_|) order drink =
-  match isServingDrinkCompletesOrder order drink with
-  | true -> Some drink
-  | false -> None
-
