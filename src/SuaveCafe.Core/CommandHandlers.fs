@@ -22,6 +22,11 @@ let (|UnPreparedFood|_|) ipo food =
   | false -> Some food
   | true -> None
 
+let (|AlreadyServedDrink|_|) ipo drink =
+  match List.contains drink ipo.ServedDrinks with
+  | true -> Some drink
+  | false -> None
+
 let handleOpenTab tab = function
 | ClosedTab _ -> [TabOpened tab] |> ok
 | _ -> TabAlreadyOpened |> fail
