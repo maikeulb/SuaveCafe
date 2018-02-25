@@ -32,3 +32,15 @@ type InProgressOrder = {
   ServedFoods : Food list
   PreparedFoods : Food list
 }
+
+let orderAmount order =
+  let foodAmount =
+    order.Foods
+    |> List.map (fun (Food f) -> f.Price) |> List.sum
+  let drinksAmount =
+    order.Drinks
+    |> List.map (fun (Drink d) -> d.Price) |> List.sum
+  foodAmount + drinksAmount
+
+let payment order =
+  {Tab = order.Tab; Amount = orderAmount order}
