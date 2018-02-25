@@ -7,6 +7,21 @@ open Domain
 open Commands
 open Errors
 
+let (|NonOrderedDrink|_|) order drink =
+  match List.contains drink order.Drinks with
+  | false -> Some drink
+  | true -> None
+
+let (|NonOrderedFood|_|) order food =
+  match List.contains food order.Foods with
+  | false -> Some food
+  | true -> None
+
+let (|UnPreparedFood|_|) ipo food =
+  match List.contains food ipo.PreparedFoods with
+  | false -> Some food
+  | true -> None
+
 let handleOpenTab tab = function
 | ClosedTab _ -> [TabOpened tab] |> ok
 | _ -> TabAlreadyOpened |> fail
